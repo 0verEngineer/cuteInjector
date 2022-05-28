@@ -14,7 +14,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/0verEngineer/cuteInjector">
-    <img src="resources/icon.png" alt="Logo">
+    <img src="resources/icon.png" alt="Logo" width="100" height="100">
   </a>
 
   <h3 align="center">cuteInjector</h3>
