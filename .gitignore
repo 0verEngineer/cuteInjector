@@ -4,6 +4,9 @@
 # Visual Studio
 */.vs/*
 
+# Visual Studio Code / VS Codium
+*/.vscode/*
+
 # Cmake
 */CmakeLists.txt.user
 */cmake-build-debug/*
