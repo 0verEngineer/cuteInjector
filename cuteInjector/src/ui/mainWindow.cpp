@@ -1,18 +1,17 @@
 #include "mainWindow.h"
 #include "ui_mainWindow.h"
 #include "textInfoWindow.h"
-#include "../helpers/jsonSerializer.h"
+#include "src/data/jsonSerializer.h"
 
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QTableWidget>
-#include <QBoxLayout>
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::mainWindow)
-{  
+{
     ui->setupUi(this);
 
     dllFileTableViewModel = new QStandardItemModel(0, 3, this);
@@ -37,8 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     selectedProcess = Process();
     selectedDll = DllFile();
 
-    // Set the deserialized data in the ui and start the process scanner
-    if (jsonSerializer::load(dllFiles, selectedProcess))
+    // Load the data and start the process scanner
+    if (JsonSerializer::instance()->loadData(dllFiles, selectedProcess))
     {
        refreshDllFileTableViewContents();
 
@@ -61,7 +60,7 @@ MainWindow::~MainWindow()
     disconnect(&injector, &Injector::signalInjectionFinished, this, &MainWindow::slotInjectionFinished);
 
     std::lock_guard<std::mutex> lock(selectedProcessMutex);
-    jsonSerializer::save(dllFiles, selectedProcess);
+    JsonSerializer::instance()->saveData(dllFiles, selectedProcess);
 
     delete selectProcessDialog;
     delete dllFileTableViewModel;

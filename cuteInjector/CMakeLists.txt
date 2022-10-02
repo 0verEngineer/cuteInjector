@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
-project(cuteInjector VERSION 0.0.2 LANGUAGES CXX)
+project(CuteInjector VERSION 0.1.0 LANGUAGES CXX)
+
+set(CUTE_INJECTOR_VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -19,7 +21,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(SOURCES
     src/main.cpp
 
-    src/helpers/jsonSerializer.h
+    src/data/jsonSerializer.cpp
+    src/data/jsonSerializer.h
 
     src/ui/mainWindow.cpp
     src/ui/mainWindow.h
@@ -48,25 +51,25 @@ enable_language("RC")
 set(RC_FILE resources/cuteInjector.rc)
 
 
-qt_add_executable(cuteInjector
+qt_add_executable(CuteInjector
     MANUAL_FINALIZATION
     ${SOURCES}
     ${RC_FILE}
 )
 
 # Autogen files in visual studio
-target_include_directories(cuteInjector
+target_include_directories(CuteInjector
     PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}/cuteInjector_autogen/include
 )
 
-target_link_libraries(cuteInjector PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(CuteInjector PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-set_target_properties(cuteInjector PROPERTIES
+set_target_properties(CuteInjector PROPERTIES
     WIN32_EXECUTABLE TRUE
     LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:WINDOWS /MACHINE:X64"
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(cuteInjector)
+    qt_finalize_executable(CuteInjector)
 endif()
