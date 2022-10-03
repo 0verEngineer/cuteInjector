@@ -22,7 +22,7 @@ public:
     void scanLoop(Process* selectedProcess, std::mutex &selectedProcessMutex);
     std::vector<std::unique_ptr<Process>> *getUpdatedProcessList();
 
-    static QPixmap getIconFromExe(const QString &path, int size);
+    QPixmap getCachedIconOfExeFile(const QString &path, int size);
     static HICON getStandardHIcon();
     static QPixmap getStandardIcon();
 
@@ -30,6 +30,8 @@ private:
     std::vector<std::unique_ptr<Process>> processList;
     std::atomic<bool> isScanLoopThreadRunning = false;
     std::thread scanLoopThread;
+
+    static QHash<QString, QPixmap> iconCache;
 
 signals:
     void processFound(const DWORD selectedProcessId,

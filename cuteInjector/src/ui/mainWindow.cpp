@@ -185,7 +185,7 @@ void MainWindow::slotProcessFound(const DWORD procId,
 
     if (hasChanged)
     {
-        QPixmap icon = processManager->getIconFromExe(path, 64);
+        QPixmap icon = processManager->getCachedIconOfExeFile(path, 64);
         ui->iconProcess->setPixmap(icon);
 
         ui->inputProcessId->setText(QString::number(procId));

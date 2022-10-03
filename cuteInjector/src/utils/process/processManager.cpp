@@ -10,6 +10,9 @@
 #include <QPixmap>
 
 
+QHash<QString, QPixmap> ProcessManager::iconCache;
+
+
 ProcessManager::ProcessManager(QObject *parent)
     : QObject{parent}
 {
@@ -153,7 +156,7 @@ std::vector<std::unique_ptr<Process>> *ProcessManager::getUpdatedProcessList()
 
                 CloseHandle(processHandle);
 
-                QPixmap icon = getIconFromExe(QString::fromStdWString(filePath), 16);
+                QPixmap icon = getCachedIconOfExeFile(QString::fromStdWString(filePath), 16);
 
                 processList.push_back(std::make_unique<Process>(
                                           procEntry.th32ProcessID,
@@ -172,8 +175,12 @@ std::vector<std::unique_ptr<Process>> *ProcessManager::getUpdatedProcessList()
 }
 
 
-QPixmap ProcessManager::getIconFromExe(const QString &path, int size)
+QPixmap ProcessManager::getCachedIconOfExeFile(const QString &path, int size)
 {
+    QString nameInCache = path + QString::number(size);
+    if (iconCache.contains(nameInCache))
+        return iconCache.take(nameInCache);
+
     HICON hIcon = 0;
     SHDefExtractIcon(path.toStdWString().c_str(), 0, 0, &hIcon, NULL, size);
 
@@ -183,6 +190,7 @@ QPixmap ProcessManager::getIconFromExe(const QString &path, int size)
     }
 
     QPixmap icon = QPixmap::fromImage(QImage::fromHICON(hIcon).scaled(size, size, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    iconCache.insert(nameInCache, icon);
     DestroyIcon(hIcon);
     return icon;
 }
@@ -196,8 +204,12 @@ HICON ProcessManager::getStandardHIcon()
 
 QPixmap ProcessManager::getStandardIcon()
 {
+    if (iconCache.contains("defaultIcon"))
+        return iconCache.take("defaultIcon");
+
     HICON hIcon = getStandardHIcon();
     QPixmap icon = QPixmap::fromImage(QImage::fromHICON(hIcon));
     DestroyIcon(hIcon);
+    iconCache.insert("defaultIcon", icon);
     return icon;
 }
