@@ -18,9 +18,8 @@ public:
     ~ProcessManager();
 
     void queryProcessInformation(const QString name);
-    void startAsyncProcessScan(const QString &name);
-    void startScanLoop(Process &selectedProcess, std::mutex &selectedProcessMutex);
-    void scanLoop(Process &selectedProcess, std::mutex &selectedProcessMutex);
+    void startProcessScanThread(Process* selectedProcess, std::mutex &selectedProcessMutex);
+    void scanLoop(Process* selectedProcess, std::mutex &selectedProcessMutex);
     std::vector<std::unique_ptr<Process>> *getUpdatedProcessList();
 
     static QPixmap getIconFromExe(const QString &path, int size);
@@ -37,7 +36,7 @@ signals:
                       const QString name,
                       const QString path,
                       const QString architecture
-                      );
+    );
     void processNotFound();
 
 };

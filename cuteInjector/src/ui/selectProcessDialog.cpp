@@ -1,5 +1,4 @@
 #include "selectprocessdialog.h"
-#include "../utils/process/processManager.h"
 
 #include <QHeaderView>
 #include <QMouseEvent>
@@ -82,7 +81,7 @@ void SelectProcessDialog::showWindow()
     table->resizeColumnsToContents();
     table->setCurrentCell(0, 2);
 
-    // The Dialog somehow does not use the table size
+    // The Dialog does not use the table size
     int width = 0;
     for (int i = 0; i < columnCount; i++)
         width += table->columnWidth(i);

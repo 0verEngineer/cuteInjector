@@ -34,6 +34,7 @@ public:
     QString name;
     QString path;
     QString architecture;
+    QString searchName;
 
     QPixmap icon;
 };

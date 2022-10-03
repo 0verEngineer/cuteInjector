@@ -48,8 +48,8 @@ private slots:
 private:
     Ui::mainWindow *ui;
     Injector injector;
-    ProcessManager processManager;
-    Process selectedProcess;
+    ProcessManager* processManager;
+    Process* selectedProcess;
     std::vector<DllFile> dllFiles;
     DllFile selectedDll;
 

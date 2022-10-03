@@ -25,45 +25,57 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->iconProcess->setScaledContents(true);
 
-    selectProcessDialog = new SelectProcessDialog(&processManager, this);
+    processManager = new ProcessManager(nullptr);
+    selectProcessDialog = new SelectProcessDialog(processManager, this);
 
     connect(selectProcessDialog, &SelectProcessDialog::signalProcessSelected, this, &MainWindow::slotProcessSelected);
-    connect(&processManager, &ProcessManager::processFound, this, &MainWindow::slotProcessFound);
-    connect(&processManager, &ProcessManager::processNotFound, this, &MainWindow::slotProcessNotFound);
+    connect(processManager, &ProcessManager::processFound, this, &MainWindow::slotProcessFound);
+    connect(processManager, &ProcessManager::processNotFound, this, &MainWindow::slotProcessNotFound);
     connect(&injector, &Injector::signalInjectionFinished, this, &MainWindow::slotInjectionFinished);
 
-    std::lock_guard<std::mutex> lock(selectedProcessMutex);
-    selectedProcess = Process();
     selectedDll = DllFile();
+    QString processNameToSet = "";
 
-    // Load the data and start the process scanner
-    if (JsonSerializer::instance()->loadData(dllFiles, selectedProcess))
+    // Load the data while locked
+    selectedProcessMutex.lock();
+    selectedProcess = new Process();
+
+    if (JsonSerializer::instance()->loadData(dllFiles, *selectedProcess))
     {
        refreshDllFileTableViewContents();
 
-       if (selectedProcess.name.length() > 0)
+       if (selectedProcess->name.length() > 0)
        {
-           ui->inputProcessName->setText(selectedProcess.name);
-           processManager.startAsyncProcessScan(selectedProcess.name);
+           processNameToSet = selectedProcess->name;
        }
     }
 
-    processManager.startScanLoop(selectedProcess, selectedProcessMutex);
+    selectedProcessMutex.unlock();
+
+    ui->inputProcessName->setText(processNameToSet);
+
+    processManager->startProcessScanThread(selectedProcess, selectedProcessMutex);
 }
 
 
 MainWindow::~MainWindow()
 {
     disconnect(selectProcessDialog, &SelectProcessDialog::signalProcessSelected, this, &MainWindow::slotProcessSelected);
-    disconnect(&processManager, &ProcessManager::processFound, this, &MainWindow::slotProcessFound);
-    disconnect(&processManager, &ProcessManager::processNotFound, this, &MainWindow::slotProcessNotFound);
+    disconnect(processManager, &ProcessManager::processFound, this, &MainWindow::slotProcessFound);
+    disconnect(processManager, &ProcessManager::processNotFound, this, &MainWindow::slotProcessNotFound);
     disconnect(&injector, &Injector::signalInjectionFinished, this, &MainWindow::slotInjectionFinished);
 
-    std::lock_guard<std::mutex> lock(selectedProcessMutex);
-    JsonSerializer::instance()->saveData(dllFiles, selectedProcess);
+    // Stops the process scan thread
+    delete processManager;
+
+    selectedProcessMutex.lock();
+    JsonSerializer::instance()->saveData(dllFiles, *selectedProcess);
+    selectedProcessMutex.unlock();
 
     delete selectProcessDialog;
     delete dllFileTableViewModel;
+
+    delete selectedProcess;
 
     delete ui;
 }
@@ -97,11 +109,11 @@ void MainWindow::refreshDllFileTableViewContents()
 // Used to activate / deactivate the inject button
 void MainWindow::injectButtonToggle()
 {
-    std::unique_lock<std::mutex> lock(selectedProcessMutex);
-    DWORD id = selectedProcess.id;
-    QString path = selectedProcess.path;
-    QString arch = selectedProcess.architecture;
-    lock.unlock();
+    selectedProcessMutex.lock();
+    DWORD id = selectedProcess->id;
+    QString path = selectedProcess->path;
+    QString arch = selectedProcess->architecture;
+    selectedProcessMutex.unlock();
 
     QString selectedDllPath = selectedDll.path;
 
@@ -160,17 +172,20 @@ void MainWindow::slotProcessFound(const DWORD procId,
                                   )
 {
     bool hasChanged = false;
-    std::unique_lock<std::mutex> lock(selectedProcessMutex);
-    if (selectedProcess.id != procId)
+    selectedProcessMutex.lock();
+    if (selectedProcess->id != procId)
     {
         hasChanged = true;
-        selectedProcess = Process(procId, name, path, architecture);
+        selectedProcess->id = procId;
+        selectedProcess->name = name;
+        selectedProcess->path = path;
+        selectedProcess->architecture = architecture;
     }
-    lock.unlock();
+    selectedProcessMutex.unlock();
 
     if (hasChanged)
     {
-        QPixmap icon = processManager.getIconFromExe(path, 64);
+        QPixmap icon = processManager->getIconFromExe(path, 64);
         ui->iconProcess->setPixmap(icon);
 
         ui->inputProcessId->setText(QString::number(procId));
@@ -183,11 +198,11 @@ void MainWindow::slotProcessFound(const DWORD procId,
 
 void MainWindow::slotProcessNotFound()
 {
-    std::unique_lock<std::mutex> lock(selectedProcessMutex);
-    selectedProcess.id = 0;
-    selectedProcess.path = "";
-    selectedProcess.architecture = "";
-    lock.unlock();
+    selectedProcessMutex.lock();
+    selectedProcess->id = 0;
+    selectedProcess->path = "";
+    selectedProcess->architecture = "";
+    selectedProcessMutex.unlock();
 
     ui->inputProcessId->setText("");
     ui->inputArchitecture->setText("");
@@ -274,10 +289,10 @@ void MainWindow::on_buttonInjectFile_clicked()
 {
     QString dllPath = selectedDll.path;
 
-    std::unique_lock<std::mutex> lock(selectedProcessMutex);
-    DWORD id = selectedProcess.id;
-    QString arch = selectedProcess.architecture;
-    lock.unlock();
+    selectedProcessMutex.lock();
+    DWORD id = selectedProcess->id;
+    QString arch = selectedProcess->architecture;
+    selectedProcessMutex.unlock();
 
     if (dllPath.length() < 1 || id == 0)
     {
@@ -292,14 +307,23 @@ void MainWindow::on_buttonInjectFile_clicked()
 
 void MainWindow::on_inputProcessName_textChanged(const QString &text)
 {
+    ui->iconProcess->clear();
+
     ui->inputProcessId->setText("");
     ui->inputArchitecture->setText("");
 
-    selectedProcess.id = 0;
-    selectedProcess.path = "";
-    selectedProcess.architecture = "";
+    selectedProcessMutex.lock();
+    selectedProcess->id = 0;
+    selectedProcess->path = "";
+    selectedProcess->name = "";
+    selectedProcess->architecture = "";
 
-    processManager.startAsyncProcessScan(text);
+    if (!text.contains("."))
+        selectedProcess->searchName = text + ".exe";
+    else
+        selectedProcess->searchName = text;
+
+    selectedProcessMutex.unlock();
 }
 
 

@@ -29,8 +29,8 @@ ProcessManager::~ProcessManager()
 
 void ProcessManager::queryProcessInformation(const QString name)
 {
-    bool found = false;
     HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    bool found = false;
     if (hSnap != INVALID_HANDLE_VALUE)
     {
         PROCESSENTRY32 procEntry;
@@ -78,36 +78,54 @@ void ProcessManager::queryProcessInformation(const QString name)
 }
 
 
-void ProcessManager::startAsyncProcessScan(const QString &name)
+void ProcessManager::startProcessScanThread(Process* selectedProcess, std::mutex &selectedProcessMutex)
 {
-    if (!name.endsWith(".exe"))
-        return;
-
-    auto future = std::async(std::launch::async, &ProcessManager::queryProcessInformation, this, name);
-}
-
-
-void ProcessManager::startScanLoop(Process &selectedProcess, std::mutex &selectedProcessMutex)
-{
-    scanLoopThread = std::thread(&ProcessManager::scanLoop, this, std::ref(selectedProcess), std::ref(selectedProcessMutex));
+    scanLoopThread = std::thread(&ProcessManager::scanLoop, this, selectedProcess, std::ref(selectedProcessMutex));
     scanLoopThread.detach();
 }
 
 
-void ProcessManager::scanLoop(Process &selectedProcess, std::mutex &selectedProcessMutex)
+void ProcessManager::scanLoop(Process* selectedProcess, std::mutex &selectedProcessMutex)
 {
     isScanLoopThreadRunning = true;
+    int skipCount = 0;
 
     while (isScanLoopThreadRunning)
     {
-        std::unique_lock<std::mutex> lock(selectedProcessMutex);
-        QString name = selectedProcess.name;
-        lock.unlock();
+        selectedProcessMutex.lock();
+        if (selectedProcess == nullptr)
+        {
+            selectedProcessMutex.unlock();
+            break;
+        }
 
-        queryProcessInformation(name);
+        QString name = selectedProcess->name;
+        QString searchName = selectedProcess->searchName;
+        selectedProcess->searchName = "";
+        selectedProcessMutex.unlock();
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        QString* stringToQuery = nullptr;
+
+        if (searchName == "")
+        {
+            if (skipCount >= 5)
+            {
+                skipCount = 0;
+                stringToQuery = &name;
+            }
+            else
+                skipCount++;
+        }
+        else
+            stringToQuery = &searchName;
+
+        if (stringToQuery != nullptr)
+            queryProcessInformation(*stringToQuery);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds (100));
     }
+
+    isScanLoopThreadRunning = false;
 }
 
 
