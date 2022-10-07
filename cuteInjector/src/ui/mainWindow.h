@@ -25,7 +25,7 @@ public:
     ~MainWindow();
 
     void refreshDllFileTableViewContents();
-    void injectButtonToggle();
+    void updateInjectButtonAndAction();
     void selectDllFileInTable(int index);
     DllFile findDllInDllFiles(const QString path);
 
@@ -38,12 +38,25 @@ private slots:
                           );
     void slotProcessNotFound();
     void slotInjectionFinished(bool success, const QString message);
-    void on_buttonSelectProcess_clicked();
-    void on_buttonAddFile_clicked();
-    void on_buttonRemoveFile_clicked();
-    void on_buttonInjectFile_clicked();
-    void on_inputProcessName_textChanged(const QString &text);
-    void on_tableViewDllFiles_clicked(const QModelIndex &index);
+    void inputProcessNameTextChanged(const QString &text);
+    void tableViewDllFilesClicked(const QModelIndex &index);
+    void inject();
+    void addFile();
+    void removeFile();
+    void selectProcess();
+
+private:
+    void createActions();
+
+public:
+    struct Actions
+    {
+        QAction* injectAct = nullptr;
+        QAction* addFileAct = nullptr;
+        QAction* removeFileAct = nullptr;
+        QAction* selectProcessAct = nullptr;
+    };
+    Actions actions;
 
 private:
     Ui::mainWindow *ui;

@@ -32,6 +32,7 @@ set(SOURCES
     src/ui/style.h
     src/ui/textInfoWindow.cpp
     src/ui/textInfoWindow.h
+    src/ui/menuBar.h src/ui/menuBar.cpp
 
     src/utils/dllFile.cpp
     src/utils/dllFile.h
@@ -43,7 +44,7 @@ set(SOURCES
     src/utils/process/process.h
     src/utils/process/processManager.cpp
     src/utils/process/processManager.h
-)
+        src/ui/mainWindowActions.cpp)
 
 
 # Icon

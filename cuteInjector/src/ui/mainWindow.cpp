@@ -2,6 +2,7 @@
 #include "ui_mainWindow.h"
 #include "textInfoWindow.h"
 #include "src/data/jsonSerializer.h"
+#include "menuBar.h"
 
 #include <QFileDialog>
 #include <QInputDialog>
@@ -25,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->iconProcess->setScaledContents(true);
 
+    createActions();
+    setMenuBar(new MenuBar(this));
+
     processManager = new ProcessManager(nullptr);
     selectProcessDialog = new SelectProcessDialog(processManager, this);
 
@@ -32,6 +36,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(processManager, &ProcessManager::processFound, this, &MainWindow::slotProcessFound);
     connect(processManager, &ProcessManager::processNotFound, this, &MainWindow::slotProcessNotFound);
     connect(&injector, &Injector::signalInjectionFinished, this, &MainWindow::slotInjectionFinished);
+
+    // connect ui elements
+    connect(ui->buttonInjectFile, &QPushButton::pressed, this, &MainWindow::inject);
+    connect(ui->buttonRemoveFile, &QPushButton::pressed, this, &MainWindow::removeFile);
+    connect(ui->buttonAddFile, &QPushButton::pressed, this, &MainWindow::addFile);
+    connect(ui->buttonSelectProcess, &QPushButton::pressed, this, &MainWindow::selectProcess);
+    connect(ui->tableViewDllFiles, &QTableView::clicked, this, &MainWindow::tableViewDllFilesClicked);
+    connect(ui->inputProcessName, &QLineEdit::textChanged, this, &MainWindow::inputProcessNameTextChanged);
 
     selectedDll = DllFile();
     QString processNameToSet = "";
@@ -107,7 +119,7 @@ void MainWindow::refreshDllFileTableViewContents()
 
 
 // Used to activate / deactivate the inject button
-void MainWindow::injectButtonToggle()
+void MainWindow::updateInjectButtonAndAction()
 {
     selectedProcessMutex.lock();
     DWORD id = selectedProcess->id;
@@ -131,6 +143,7 @@ void MainWindow::injectButtonToggle()
     }
 
     ui->buttonInjectFile->setEnabled(enabled);
+    actions.injectAct->setEnabled(enabled);
 }
 
 
@@ -161,7 +174,7 @@ DllFile MainWindow::findDllInDllFiles(const QString path)
 void MainWindow::slotProcessSelected(const QString name)
 {
     ui->inputProcessName->setText(name);
-    this->on_inputProcessName_textChanged(name);
+    this->inputProcessNameTextChanged(name);
 }
 
 
@@ -191,7 +204,7 @@ void MainWindow::slotProcessFound(const DWORD procId,
         ui->inputProcessId->setText(QString::number(procId));
         ui->inputArchitecture->setText(architecture);
 
-        injectButtonToggle();
+        updateInjectButtonAndAction();
     }
 }
 
@@ -207,7 +220,7 @@ void MainWindow::slotProcessNotFound()
     ui->inputProcessId->setText("");
     ui->inputArchitecture->setText("");
 
-    injectButtonToggle();
+    updateInjectButtonAndAction();
 }
 
 
@@ -217,95 +230,7 @@ void MainWindow::slotInjectionFinished(bool success, const QString message)
 }
 
 
-void MainWindow::on_buttonSelectProcess_clicked()
-{
-    selectProcessDialog->showWindow();
-}
-
-
-void MainWindow::on_buttonAddFile_clicked()
-{
-    QUrl url = QFileDialog::getOpenFileUrl(this, "Select dll", QDir::currentPath(), "dll Files (*.dll)");
-    if (!url.isValid())
-        return;
-
-    QString path = url.path().mid(1, url.path().length());
-
-    // Do not allow the same dll multiple times
-    if(findDllInDllFiles(path).path.length() > 0)
-    {
-        ui->statusbar->showMessage("File already added", 8000);
-
-        // Select the dll instead
-        for (int i = 0; i < dllFiles.size(); i++)
-        {
-            if (dllFiles[i].path == path)
-            {
-                selectDllFileInTable(i);
-            }
-        }
-        return;
-    }
-
-    dllFiles.push_back(DllFile(path));
-
-    refreshDllFileTableViewContents();
-
-    // Always select the newest dll
-    if (dllFiles.size() > 0)
-    {
-        selectDllFileInTable(dllFiles.size() - 1);
-    }
-
-    injectButtonToggle();
-
-    ui->buttonRemoveFile->setEnabled(true);
-}
-
-
-void MainWindow::on_buttonRemoveFile_clicked()
-{
-    QModelIndexList indexes = ui->tableViewDllFiles->selectionModel()->selectedRows();
-
-    while (!indexes.isEmpty())
-    {
-        dllFiles.erase(dllFiles.begin() + indexes.last().row());
-        indexes.removeLast();
-    }
-
-    refreshDllFileTableViewContents();
-
-    selectedDll = DllFile();
-
-    injectButtonToggle();
-
-    // Disable the remove button
-    if (dllFileTableViewModel->rowCount() <= 0)
-        ui->buttonRemoveFile->setEnabled(false);
-}
-
-
-void MainWindow::on_buttonInjectFile_clicked()
-{
-    QString dllPath = selectedDll.path;
-
-    selectedProcessMutex.lock();
-    DWORD id = selectedProcess->id;
-    QString arch = selectedProcess->architecture;
-    selectedProcessMutex.unlock();
-
-    if (dllPath.length() < 1 || id == 0)
-    {
-        ui->statusbar->showMessage("No file selected", 8000);
-        injectButtonToggle();
-        return;
-    }
-
-    injector.run(id, dllPath, arch);
-}
-
-
-void MainWindow::on_inputProcessName_textChanged(const QString &text)
+void MainWindow::inputProcessNameTextChanged(const QString &text)
 {
     ui->iconProcess->clear();
 
@@ -327,7 +252,7 @@ void MainWindow::on_inputProcessName_textChanged(const QString &text)
 }
 
 
-void MainWindow::on_tableViewDllFiles_clicked(const QModelIndex &index)
+void MainWindow::tableViewDllFilesClicked(const QModelIndex &index)
 {
     QModelIndexList indexList = ui->tableViewDllFiles->selectionModel()->selectedRows();
 
@@ -343,7 +268,7 @@ void MainWindow::on_tableViewDllFiles_clicked(const QModelIndex &index)
             ui->statusbar->showMessage("Selected dll could not be found", 8000);
         }
 
-        injectButtonToggle();
+        updateInjectButtonAndAction();
 
         ui->buttonRemoveFile->setEnabled(true);
     }
