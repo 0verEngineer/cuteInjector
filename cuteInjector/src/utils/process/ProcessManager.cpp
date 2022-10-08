@@ -1,4 +1,4 @@
-#include "processManager.h"
+#include "ProcessManager.h"
 
 #include <psapi.h>
 #include <TlHelp32.h>

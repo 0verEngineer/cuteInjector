@@ -1,5 +1,5 @@
-#include "process.h"
-#include "processManager.h"
+#include "Process.h"
+#include "ProcessManager.h"
 
 
 Process::Process()

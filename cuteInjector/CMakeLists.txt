@@ -17,35 +17,35 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(SOURCES
-    src/main.cpp
+    src/Main.cpp
     src/Settings.cpp src/Settings.h
 
-    src/data/jsonSerializer.cpp
-    src/data/jsonSerializer.h
+    src/data/JsonSerializer.cpp
+    src/data/JsonSerializer.h
 
-    src/ui/mainWindow.cpp
-    src/ui/mainWindow.h
-    src/ui/mainWindowActions.cpp
-    src/ui/mainWindow.ui
-    src/ui/style.h
-    src/ui/textInfoWindow.cpp
-    src/ui/textInfoWindow.h
-    src/ui/menuBar.h src/ui/menuBar.cpp
+    src/ui/MainWindow.cpp
+    src/ui/MainWindow.h
+    src/ui/MainWindowActions.cpp
+    src/ui/MainWindow.ui
+    src/ui/Style.h
+    src/ui/TextInfoWindow.cpp
+    src/ui/TextInfoWindow.h
+    src/ui/MenuBar.h src/ui/MenuBar.cpp
 
-    src/ui/dialogs/selectProcessDialog.cpp
-    src/ui/dialogs/selectProcessDialog.h
+    src/ui/dialogs/SelectProcessDialog.cpp
+    src/ui/dialogs/SelectProcessDialog.h
     src/ui/dialogs/settings/SettingsDialog.cpp src/ui/dialogs/settings/SettingsDialog.h
     src/ui/dialogs/settings/HotKeySettingsTab.cpp src/ui/dialogs/settings/HotKeySettingsTab.h
     src/ui/dialogs/settings/HotKeySettingsLine.cpp src/ui/dialogs/settings/HotKeySettingsLine.h
 
-    src/utils/dllFile.cpp
-    src/utils/dllFile.h
-    src/utils/injector/injector.cpp
-    src/utils/injector/injector.h
-    src/utils/process/process.cpp
-    src/utils/process/process.h
-    src/utils/process/processManager.cpp
-    src/utils/process/processManager.h
+    src/utils/DllFile.cpp
+    src/utils/DllFile.h
+    src/utils/injector/Injector.cpp
+    src/utils/injector/Injector.h
+    src/utils/process/Process.cpp
+    src/utils/process/Process.h
+    src/utils/process/ProcessManager.cpp
+    src/utils/process/ProcessManager.h
 )
 
 

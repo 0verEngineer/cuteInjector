@@ -4,7 +4,7 @@
 #include "qmenu.h"
 #include "qmenubar.h"
 #include "qwidget.h"
-#include "mainWindow.h"
+#include "MainWindow.h"
 
 
 class MenuBar : public QMenuBar

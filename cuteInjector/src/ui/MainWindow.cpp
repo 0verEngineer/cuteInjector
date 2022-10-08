@@ -1,7 +1,7 @@
-#include "mainWindow.h"
-#include "ui_mainWindow.h"
-#include "src/data/jsonSerializer.h"
-#include "menuBar.h"
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
+#include "src/data/JsonSerializer.h"
+#include "MenuBar.h"
 #include "src/Settings.h"
 
 #include "qfiledialog.h"
@@ -11,7 +11,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::mainWindow)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 

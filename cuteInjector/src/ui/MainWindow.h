@@ -1,10 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "src/ui/dialogs/selectProcessDialog.h"
-#include "../utils/process/processManager.h"
-#include "../utils/injector/injector.h"
-#include "../utils/dllFile.h"
+#include "src/ui/dialogs/SelectProcessDialog.h"
+#include "../utils/process/ProcessManager.h"
+#include "../utils/injector/Injector.h"
+#include "../utils/DllFile.h"
 
 #include <QMainWindow>
 #include <QStandardItemModel>
@@ -16,7 +16,7 @@
 class SettingsDialog;
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class mainWindow; }
+namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -65,7 +65,7 @@ public:
     Actions actions;
 
 private:
-    Ui::mainWindow *ui;
+    Ui::MainWindow *ui;
     Injector injector;
     ProcessManager* processManager;
     Process* selectedProcess;

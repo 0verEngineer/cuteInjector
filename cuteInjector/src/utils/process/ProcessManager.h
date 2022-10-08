@@ -1,7 +1,7 @@
 #ifndef PROCESSMANAGER_H
 #define PROCESSMANAGER_H
 
-#include "process.h"
+#include "Process.h"
 
 #include <Windows.h>
 #include <thread>

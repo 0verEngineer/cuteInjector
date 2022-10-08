@@ -1,4 +1,4 @@
-#include "selectProcessDialog.h"
+#include "SelectProcessDialog.h"
 
 #include <QHeaderView>
 #include <QMouseEvent>

@@ -1,4 +1,4 @@
-#include "textInfoWindow.h"
+#include "TextInfoWindow.h"
 
 
 TextInfoWindow::TextInfoWindow(QString windowTitle, QString text)

@@ -1,8 +1,8 @@
 #ifndef JSONSERIALIZER_H
 #define JSONSERIALIZER_H
 
-#include "src/utils/dllFile.h"
-#include "src/utils/process/process.h"
+#include "src/utils/DllFile.h"
+#include "src/utils/process/Process.h"
 
 #include "vendor/nlohmann/json.hpp"
 

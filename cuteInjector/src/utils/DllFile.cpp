@@ -1,4 +1,4 @@
-#include "dllFile.h"
+#include "DllFile.h"
 
 #include <Windows.h>
 #include <QStringList>
