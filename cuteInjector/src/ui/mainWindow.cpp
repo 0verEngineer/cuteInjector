@@ -1,12 +1,12 @@
 #include "mainWindow.h"
 #include "ui_mainWindow.h"
-#include "textInfoWindow.h"
 #include "src/data/jsonSerializer.h"
 #include "menuBar.h"
+#include "src/Settings.h"
 
-#include <QFileDialog>
-#include <QInputDialog>
-#include <QTableWidget>
+#include "qfiledialog.h"
+#include "qinputdialog.h"
+#include "qtabwidget.h"
 
 
 MainWindow::MainWindow(QWidget *parent)

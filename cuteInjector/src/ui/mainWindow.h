@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "selectProcessDialog.h"
+#include "src/ui/dialogs/selectProcessDialog.h"
 #include "../utils/process/processManager.h"
 #include "../utils/injector/injector.h"
 #include "../utils/dllFile.h"
@@ -10,7 +10,10 @@
 #include <QStandardItemModel>
 #include <QDialog>
 #include <QPixmap>
+#include <QSettings>
 
+
+class SettingsDialog;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class mainWindow; }
@@ -44,9 +47,11 @@ private slots:
     void addFile();
     void removeFile();
     void selectProcess();
+    void openSettings();
 
 private:
     void createActions();
+    void setActionHotkeys();
 
 public:
     struct Actions
@@ -55,6 +60,7 @@ public:
         QAction* addFileAct = nullptr;
         QAction* removeFileAct = nullptr;
         QAction* selectProcessAct = nullptr;
+        QAction* openSettingsAct = nullptr;
     };
     Actions actions;
 

@@ -3,29 +3,44 @@
 
 #include "qfiledialog.h"
 #include "qaction.h"
+#include "src/Settings.h"
+#include "src/ui/dialogs/settings/SettingsDialog.h"
 
 
 void MainWindow::createActions()
 {
     actions.injectAct = new QAction("Inject", this);
-    actions.injectAct->setShortcut(QKeySequence::fromString("ctrl+i"));
     connect(actions.injectAct, &QAction::triggered, this, &MainWindow::inject);
     addAction(actions.injectAct);
 
     actions.addFileAct = new QAction("Add File", this);
-    actions.addFileAct->setShortcut(QKeySequence::fromString("ctrl+a"));
     connect(actions.addFileAct, &QAction::triggered, this, &MainWindow::addFile);
     addAction(actions.addFileAct);
 
     actions.removeFileAct = new QAction("Remove File", this);
-    actions.removeFileAct->setShortcut(QKeySequence::fromString("ctrl+r"));
     connect(actions.removeFileAct, &QAction::triggered, this, &MainWindow::removeFile);
     addAction(actions.removeFileAct);
 
     actions.selectProcessAct = new QAction("Select Process", this);
-    actions.selectProcessAct->setShortcut(QKeySequence::fromString("ctrl+s"));
     connect(actions.selectProcessAct, &QAction::triggered, this, &MainWindow::selectProcess);
     addAction(actions.selectProcessAct);
+
+    actions.openSettingsAct = new QAction("Settings", this);
+    connect(actions.openSettingsAct, &QAction::triggered, this, &MainWindow::openSettings);
+    addAction(actions.openSettingsAct);
+
+    setActionHotkeys();
+}
+
+
+void MainWindow::setActionHotkeys()
+{
+    Settings* settings = Settings::instance();
+    actions.injectAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/inject").toString()));
+    actions.addFileAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/addFile").toString()));
+    actions.removeFileAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/removeFile").toString()));
+    actions.selectProcessAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/selectProcess").toString()));
+    actions.openSettingsAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/openSettings").toString()));
 }
 
 
@@ -117,3 +132,13 @@ void MainWindow::selectProcess()
 }
 
 
+void MainWindow::openSettings()
+{
+    SettingsDialog settingsDialog = SettingsDialog();
+
+    connect(&settingsDialog, &SettingsDialog::hotKeyChanged, this, [this] {
+        setActionHotkeys();
+    });
+
+    settingsDialog.execDialog();
+}

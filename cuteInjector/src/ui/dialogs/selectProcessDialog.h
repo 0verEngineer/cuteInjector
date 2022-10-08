@@ -1,8 +1,8 @@
 #ifndef SELECTPROCESSDIALOG_H
 #define SELECTPROCESSDIALOG_H
 
-#include "../utils/process/process.h"
-#include "../utils/process/processManager.h"
+#include "src/utils/process/process.h"
+#include "src/utils/process/processManager.h"
 
 #include <QDialog>
 #include <QObject>
