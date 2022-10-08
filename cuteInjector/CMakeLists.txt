@@ -31,6 +31,7 @@ set(SOURCES
     src/ui/TextInfoWindow.cpp
     src/ui/TextInfoWindow.h
     src/ui/MenuBar.h src/ui/MenuBar.cpp
+    src/ui/WindowsTheme.h src/definitions/Themes.h
 
     src/ui/dialogs/SelectProcessDialog.cpp
     src/ui/dialogs/SelectProcessDialog.h
@@ -46,6 +47,7 @@ set(SOURCES
     src/utils/process/Process.h
     src/utils/process/ProcessManager.cpp
     src/utils/process/ProcessManager.h
+    src/ui/WindowsTheme.cpp
 )
 
 

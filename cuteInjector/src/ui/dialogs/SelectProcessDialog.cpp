@@ -1,4 +1,6 @@
 #include "SelectProcessDialog.h"
+#include "src/ui/WindowsTheme.h"
+#include "src/definitions/Themes.h"
 
 #include <QHeaderView>
 #include <QMouseEvent>
@@ -8,6 +10,9 @@
 
 SelectProcessDialog::SelectProcessDialog(ProcessManager* processManager, QWidget* parent)
 {
+    if (WindowsTheme::getWindowsSystemTheme() == SYSTEMTHEMES.DARK)
+        WindowsTheme::setDarkTitleBarWindows(reinterpret_cast<HWND>(winId()));
+
     this->setWindowTitle("Select Process");
 
     this->processManager = processManager;

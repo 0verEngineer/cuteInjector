@@ -2,7 +2,8 @@
 #include "ui_MainWindow.h"
 #include "src/data/JsonSerializer.h"
 #include "MenuBar.h"
-#include "src/Settings.h"
+#include "WindowsTheme.h"
+#include "../definitions/Themes.h"
 
 #include "qfiledialog.h"
 #include "qinputdialog.h"
@@ -14,6 +15,9 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    if (WindowsTheme::getWindowsSystemTheme() == SYSTEMTHEMES.DARK)
+        WindowsTheme::setDarkTitleBarWindows(reinterpret_cast<HWND>(winId()));
 
     dllFileTableViewModel = new QStandardItemModel(0, 3, this);
     ui->tableViewDllFiles->horizontalHeader()->hide();
