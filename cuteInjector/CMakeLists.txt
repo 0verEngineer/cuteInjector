@@ -65,7 +65,7 @@ qt_add_executable(CuteInjector
 # Autogen files in visual studio
 target_include_directories(CuteInjector
     PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}/cuteInjector_autogen/include
+    ${CMAKE_CURRENT_BINARY_DIR}/CuteInjector_autogen/include
 )
 
 target_link_libraries(CuteInjector PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

@@ -1,15 +1,17 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "src/Settings.h"
+#include "src/ui/dialogs/settings/SettingsDialog.h"
 
 #include "qfiledialog.h"
 #include "qaction.h"
-#include "src/Settings.h"
-#include "src/ui/dialogs/settings/SettingsDialog.h"
+#include "Windows.h"
 
 
 void MainWindow::createActions()
 {
     actions.injectAct = new QAction("Inject", this);
+    actions.injectAct->setDisabled(true);
     connect(actions.injectAct, &QAction::triggered, this, &MainWindow::inject);
     addAction(actions.injectAct);
 
@@ -18,6 +20,7 @@ void MainWindow::createActions()
     addAction(actions.addFileAct);
 
     actions.removeFileAct = new QAction("Remove File", this);
+    actions.removeFileAct->setDisabled(true);
     connect(actions.removeFileAct, &QAction::triggered, this, &MainWindow::removeFile);
     addAction(actions.removeFileAct);
 
@@ -36,11 +39,87 @@ void MainWindow::createActions()
 void MainWindow::setActionHotkeys()
 {
     Settings* settings = Settings::instance();
-    actions.injectAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/inject").toString()));
+
+    if (globalRegisteredHotkeyIds.size() > 0)
+        unregisterGlobalWindowsHotKeys();
+
+    if (settings->value("globalHotkeys/inject").toBool())
+        registerGlobalWindowsHotKey(settings->value("hotkeys/inject").toString(), "globalHotkeys/inject");
+    else
+        actions.injectAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/inject").toString()));
+
     actions.addFileAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/addFile").toString()));
     actions.removeFileAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/removeFile").toString()));
     actions.selectProcessAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/selectProcess").toString()));
     actions.openSettingsAct->setShortcut(QKeySequence::fromString(settings->value("hotkeys/openSettings").toString()));
+}
+
+
+void MainWindow::registerGlobalWindowsHotKey(const QString& hotKeySequence, const QString& settingsKey)
+{
+    QKeySequence seq = QKeySequence::fromString(hotKeySequence);
+    QList<QString> keys = seq.toString().split("+");
+
+    QList<UINT> modifiers;
+    int modifier = 0;
+
+    for (const auto& key : keys)
+    {
+        if (key == "Ctrl")
+            modifier += MOD_CONTROL;
+
+        else if (key == "Alt")
+            modifier += MOD_ALT;
+
+        else if (key == "Shift")
+            modifier += MOD_SHIFT;
+
+        else
+        {
+            if (key != keys.at(keys.size() - 1))
+            {
+                qWarning() << "Only Ctrl, Alt and Shift modifiers in combination with a single key is allowed on a global hotkey. ";
+                return;
+            }
+        }
+    }
+
+    if(modifier == 0)
+    {
+        qWarning() << "Unable to register global hotkey, modifier is 0";
+        return;
+    }
+
+    // Get the key code
+    QString key = keys.at(keys.size() - 1);
+    QKeySequence keyOnlyKeySequence = QKeySequence::fromString(key);
+
+    int id = 0;
+    for (const auto& registeredId : globalRegisteredHotkeyIds)
+    {
+        if (registeredId >= id)
+            id = registeredId + 1;
+    }
+
+    if (!RegisterHotKey(HWND(effectiveWinId()), id, modifier, keyOnlyKeySequence[0].key()))
+    {
+        qWarning() << "Unable to register global hotkey: " << hotKeySequence;
+        return;
+    }
+
+    globalRegisteredHotkeyIds.push_back(id);
+}
+
+
+void MainWindow::unregisterGlobalWindowsHotKeys()
+{
+    for (const auto& id : globalRegisteredHotkeyIds)
+    {
+        if (UnregisterHotKey(HWND(effectiveWinId()), id) == 0)
+            qWarning() << "Unable to unregister global hotkey: ";
+    }
+
+    globalRegisteredHotkeyIds.clear();
 }
 
 
@@ -99,8 +178,7 @@ void MainWindow::addFile()
     }
 
     updateInjectButtonAndAction();
-
-    ui->buttonRemoveFile->setEnabled(true);
+    updateRemoveButtonAndAction();
 }
 
 
@@ -119,10 +197,7 @@ void MainWindow::removeFile()
     selectedDll = DllFile();
 
     updateInjectButtonAndAction();
-
-    // Disable the remove button
-    if (dllFileTableViewModel->rowCount() <= 0)
-        ui->buttonRemoveFile->setEnabled(false);
+    updateRemoveButtonAndAction();
 }
 
 

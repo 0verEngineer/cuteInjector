@@ -29,6 +29,7 @@ public:
 
     void refreshDllFileTableViewContents();
     void updateInjectButtonAndAction();
+    void updateRemoveButtonAndAction();
     void selectDllFileInTable(int index);
     DllFile findDllInDllFiles(const QString path);
 
@@ -52,6 +53,10 @@ private slots:
 private:
     void createActions();
     void setActionHotkeys();
+    void registerGlobalWindowsHotKey(const QString& hotKeySequence, const QString& settingsKey);
+    void unregisterGlobalWindowsHotKeys();
+
+    bool nativeEvent(const QByteArray &eventType, void *message, long long *result);
 
 public:
     struct Actions
@@ -78,6 +83,8 @@ private:
     SelectProcessDialog* selectProcessDialog = nullptr;
 
     std::mutex selectedProcessMutex;
+
+    QList<int> globalRegisteredHotkeyIds;
 };
 
 #endif // MAINWINDOW_H

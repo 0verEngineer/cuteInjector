@@ -12,7 +12,7 @@ class HotKeySettingsLine : public QWidget
     Q_OBJECT
 
 public:
-    HotKeySettingsLine(const QString& name, const QString& settingsKey, QWidget* parent = nullptr);
+    HotKeySettingsLine(const QString& name, const QString& settingsKey, QWidget* parent = nullptr, bool canBeGlobal = false);
 
 signals:
     void hotKeyChanged();

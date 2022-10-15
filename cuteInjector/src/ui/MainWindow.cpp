@@ -81,6 +81,8 @@ MainWindow::~MainWindow()
     disconnect(processManager, &ProcessManager::processNotFound, this, &MainWindow::slotProcessNotFound);
     disconnect(&injector, &Injector::signalInjectionFinished, this, &MainWindow::slotInjectionFinished);
 
+    unregisterGlobalWindowsHotKeys();
+
     // Stops the process scan thread
     delete processManager;
 
@@ -150,6 +152,20 @@ void MainWindow::updateInjectButtonAndAction()
     actions.injectAct->setEnabled(enabled);
 }
 
+
+void MainWindow::updateRemoveButtonAndAction()
+{
+    if (dllFileTableViewModel->rowCount() <= 0)
+    {
+        ui->buttonRemoveFile->setEnabled(false);
+        actions.removeFileAct->setEnabled(false);
+    }
+    else
+    {
+        ui->buttonRemoveFile->setEnabled(true);
+        actions.removeFileAct->setEnabled(true);
+    }
+}
 
 void MainWindow::selectDllFileInTable(int index)
 {
@@ -273,8 +289,28 @@ void MainWindow::tableViewDllFilesClicked(const QModelIndex &index)
         }
 
         updateInjectButtonAndAction();
-
-        ui->buttonRemoveFile->setEnabled(true);
+        updateRemoveButtonAndAction();
     }
 }
 
+
+bool MainWindow::nativeEvent(const QByteArray& eventType, void* message, long long* result)
+{
+    Q_UNUSED(eventType);
+    Q_UNUSED(result);
+    MSG* msg = static_cast<MSG*>(message);
+    if (msg->message == WM_HOTKEY)
+    {
+        switch (msg->wParam)
+        {
+            case 0:
+                if (actions.injectAct->isEnabled())
+                    actions.injectAct->toggle();
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+    return false;
+}

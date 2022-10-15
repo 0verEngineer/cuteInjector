@@ -6,6 +6,7 @@
 
 # Visual Studio Code / VS Codium
 */.vscode/*
+*/build/*
 
 # Cmake
 */CmakeLists.txt.user

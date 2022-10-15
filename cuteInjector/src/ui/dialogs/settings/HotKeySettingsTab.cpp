@@ -25,7 +25,7 @@ HotKeySettingsTab::HotKeySettingsTab(QWidget *parent)
 
     QList<HotKeySettingsLine*> lines;
 
-    lines.push_back(new HotKeySettingsLine("Inject", "hotkeys/inject", this));
+    lines.push_back(new HotKeySettingsLine("Inject", "hotkeys/inject", this, true));
     lines.push_back(new HotKeySettingsLine("Add File", "hotkeys/addFile", this));
     lines.push_back(new HotKeySettingsLine("Remove File", "hotkeys/removeFile", this));
     lines.push_back(new HotKeySettingsLine("Select Process", "hotkeys/selectProcess", this));

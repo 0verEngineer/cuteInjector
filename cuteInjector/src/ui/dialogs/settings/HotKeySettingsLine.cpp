@@ -7,9 +7,10 @@
 #include "qkeysequenceedit.h"
 #include "qtoolbutton.h"
 #include "qaction.h"
+#include "qcheckbox.h"
 
 
-HotKeySettingsLine::HotKeySettingsLine(const QString &name, const QString &settingsKey, QWidget *parent)
+HotKeySettingsLine::HotKeySettingsLine(const QString &name, const QString &settingsKey, QWidget *parent, bool canBeGlobal /*= false*/)
 {
     setParent(parent);
     layout = new QHBoxLayout(this);
@@ -33,6 +34,20 @@ HotKeySettingsLine::HotKeySettingsLine(const QString &name, const QString &setti
 
     layout->addWidget(label);
     layout->addWidget(edit);
+
+    if (canBeGlobal)
+    {
+        QCheckBox* isGlobalCheckBox = new QCheckBox(this);
+        isGlobalCheckBox->setText(tr("Global"));
+        QString settingsKeyGlobal = QString(settingsKey).replace("hotkeys", "globalHotkeys");
+        isGlobalCheckBox->setChecked(settings->value(settingsKeyGlobal).toBool());
+        layout->addWidget(isGlobalCheckBox);
+
+        connect(isGlobalCheckBox, &QCheckBox::toggled, this, [=] (bool checked) {
+            settings->setValue(settingsKeyGlobal, checked);
+            emit hotKeyChanged();
+        });
+    }
 
     connect(edit, &QKeySequenceEdit::editingFinished, this, [=] {
         if (settings->value(settingsKey).toString() != edit->keySequence().toString())
