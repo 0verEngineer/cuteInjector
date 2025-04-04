@@ -23,6 +23,10 @@
     Simple dll injector built with QT
     <br />
     <br />
+    <a href="https://codeberg.org/OverEngineer/cuteInjector">Codeberg</a>
+    ·
+    <a href="https://github.com/0verEngineer/cuteInjector">Github</a>
+    .
     <a href="https://github.com/0verEngineer/cuteInjector/issues">Report Bug</a>
     ·
     <a href="https://github.com/0verEngineer/cuteInjector/issues">Request Feature</a>
