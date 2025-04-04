@@ -139,7 +139,7 @@ Distributed under the Apache License 2.0. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Julian Hackinger - dev@hackinger.io
+Julian Hackinger - dev@hackinger.net
 
 Project Link: [https://github.com/0verEngineer/cuteInjector](https://github.com/0verEngineer/cuteInjector)
 
